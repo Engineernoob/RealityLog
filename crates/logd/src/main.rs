@@ -4,7 +4,6 @@ use anyhow::Context;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    response::IntoResponse,
     routing::{get, post},
     Json, Router,
 };
@@ -13,7 +12,7 @@ use reality_core::{
     leaf_hash, make_proof, root as merkle_root, AnchorRecord, AppendRequest, AppendResponse, InclusionProof,
     MerkleError, RootResponse, VerifyRequest, VerifyResponse,
 };
-use tokio::sync::RwLock;
+use tokio::{net::TcpListener, sync::RwLock};
 use tracing::{error, info};
 
 #[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
@@ -57,10 +56,9 @@ async fn main() -> anyhow::Result<()> {
         .route("/anchors", get(anchors))
         .with_state(state.clone());
 
-    info!("listening", %addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await?;
+    let listener = TcpListener::bind(addr).await?;
+    info!(%addr, "listening");
+    axum::serve(listener, app.into_make_service()).await?;
 
     Ok(())
 }
