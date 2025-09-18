@@ -1,10 +1,10 @@
 use std::{env, path::PathBuf, time::Duration};
 
 use anyhow::Context;
-use chrono::Utc;
 use reality_core::{AnchorRecord, RootResponse};
 use reqwest::Client;
 use sha2::{Digest, Sha256};
+use time::OffsetDateTime;
 use tokio::time::sleep;
 use tracing::{info, warn};
 
@@ -13,7 +13,8 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
     let api = env::var("REALITY_LOG_API").unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
-    let data_dir = PathBuf::from(env::var("REALITY_LOG_DIR").unwrap_or_else(|_| "data".to_string()));
+    let data_dir =
+        PathBuf::from(env::var("REALITY_LOG_DIR").unwrap_or_else(|_| "data".to_string()));
     tokio::fs::create_dir_all(&data_dir)
         .await
         .context("create data dir")?;
@@ -36,10 +37,7 @@ async fn main() -> anyhow::Result<()> {
                     .unwrap_or(true);
 
                 if is_new {
-                    let timestamp = Utc::now()
-                        .timestamp_nanos_opt()
-                        .unwrap_or_else(|| Utc::now().timestamp_nanos())
-                        .to_string();
+                    let timestamp = OffsetDateTime::now_utc().unix_timestamp_nanos().to_string();
                     let txid = compute_txid(root.size, &root.root, &timestamp);
                     let record = AnchorRecord {
                         root: root.root.clone(),
@@ -50,7 +48,12 @@ async fn main() -> anyhow::Result<()> {
                     anchors.push(record.clone());
                     write_json(&anchors_path, &anchors).await?;
                     last_anchor = Some(record.clone());
-                    info!(root = %record.root, size = record.size, txid = %record.txid, "anchored new root");
+                    info!(
+                        root = %record.root,
+                        size = record.size,
+                        txid = %record.txid,
+                        "anchored new root"
+                    );
                 }
             }
             Err(err) => {
@@ -63,7 +66,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn fetch_root(client: &Client, base: &str) -> anyhow::Result<RootResponse> {
-    let url = format("{}/root", base.trim_end_matches('/'));
+    let url = format!("{}/root", base.trim_end_matches('/'));
     let resp = client.get(url).send().await?.error_for_status()?;
     Ok(resp.json::<RootResponse>().await?)
 }

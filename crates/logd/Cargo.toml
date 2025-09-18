@@ -8,11 +8,16 @@ license.workspace = true
 [dependencies]
 anyhow.workspace = true
 axum.workspace = true
-hex.workspace = true
-chrono.workspace = true
-reality-core = { path = "../core" }
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+reality-core = { path = "../core" }
+
+# needed for date/timestamp
+time = { version = "0.3", features = ["formatting"] }
+
+# if you need hex and sha2 directly in logd:
+hex.workspace = true
+sha2.workspace = true

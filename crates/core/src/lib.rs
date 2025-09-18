@@ -1,3 +1,4 @@
+pub mod types;
 use sha2::{Digest, Sha256};
 use std::fmt;
 
@@ -283,10 +284,22 @@ mod tests {
         let root3 = hex::encode(root(&leaves3));
         let root4 = hex::encode(root(&leaves4));
 
-        assert_eq!(root1, "022a6979e6dab7aa5ae4c3e5e45f7e977112a7e63593820dbec1ec738a24f93c");
-        assert_eq!(root2, "b137985ff484fb600db93107c77b0365c80d78f5b429ded0fd97361d077999eb");
-        assert_eq!(root3, "e9636069c740c9ff51625b01a0b040396d265a9b920cc6febdfa5ecc9f58ecce");
-        assert_eq!(root4, "33376a3bd63e9993708a84ddfe6c28ae58b83505dd1fed711bd924ec5a6239f0");
+        assert_eq!(
+            root1,
+            "022a6979e6dab7aa5ae4c3e5e45f7e977112a7e63593820dbec1ec738a24f93c"
+        );
+        assert_eq!(
+            root2,
+            "b137985ff484fb600db93107c77b0365c80d78f5b429ded0fd97361d077999eb"
+        );
+        assert_eq!(
+            root3,
+            "e9636069c740c9ff51625b01a0b040396d265a9b920cc6febdfa5ecc9f58ecce"
+        );
+        assert_eq!(
+            root4,
+            "33376a3bd63e9993708a84ddfe6c28ae58b83505dd1fed711bd924ec5a6239f0"
+        );
     }
 
     #[test]

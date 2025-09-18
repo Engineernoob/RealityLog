@@ -7,11 +7,11 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use chrono::Utc;
 use reality_core::{
-    leaf_hash, make_proof, root as merkle_root, AnchorRecord, AppendRequest, AppendResponse, InclusionProof,
-    MerkleError, RootResponse, VerifyRequest, VerifyResponse,
+    leaf_hash, make_proof, root as merkle_root, AnchorRecord, AppendRequest, AppendResponse,
+    InclusionProof, MerkleError, RootResponse, VerifyRequest, VerifyResponse,
 };
+use time::OffsetDateTime;
 use tokio::{net::TcpListener, sync::RwLock};
 use tracing::{error, info};
 
@@ -44,7 +44,8 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(8080);
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
-    let data_dir = PathBuf::from(env::var("REALITY_LOG_DIR").unwrap_or_else(|_| "data".to_string()));
+    let data_dir =
+        PathBuf::from(env::var("REALITY_LOG_DIR").unwrap_or_else(|_| "data".to_string()));
     let state = AppState::new(data_dir).await?;
 
     let app = Router::new()
@@ -69,8 +70,12 @@ impl AppState {
             .await
             .context("create data dir")?;
 
-        let leaves: Vec<String> = read_json(data_dir.join("leaves.json")).await?.unwrap_or_default();
-        let entries: Vec<LogEntry> = read_json(data_dir.join("entries.json")).await?.unwrap_or_default();
+        let leaves: Vec<String> = read_json(data_dir.join("leaves.json"))
+            .await?
+            .unwrap_or_default();
+        let entries: Vec<LogEntry> = read_json(data_dir.join("entries.json"))
+            .await?
+            .unwrap_or_default();
 
         ensure_file(data_dir.join("anchors.json")).await?;
 
@@ -87,7 +92,9 @@ impl AppState {
     }
 
     async fn read_anchors(&self) -> anyhow::Result<Vec<AnchorRecord>> {
-        Ok(read_json(self.data_path("anchors.json")).await?.unwrap_or_default())
+        Ok(read_json(self.data_path("anchors.json"))
+            .await?
+            .unwrap_or_default())
     }
 
     fn data_path(&self, name: &str) -> PathBuf {
@@ -108,7 +115,9 @@ async fn append(
     let entry = LogEntry {
         payload: req.payload.clone(),
         leaf: leaf_hex.clone(),
-        appended_at: Utc::now().to_rfc3339(),
+        appended_at: OffsetDateTime::now_utc()
+            .format(&time::format_description::well_known::Rfc3339)
+            .unwrap(),
     };
 
     let (response, snapshot) = {
@@ -121,7 +130,10 @@ async fn append(
             Ok(l) => l,
             Err(e) => {
                 error!(?e, "failed to decode leaves");
-                return Err((StatusCode::INTERNAL_SERVER_ERROR, "corrupt leaf storage".into()));
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "corrupt leaf storage".into(),
+                ));
             }
         };
         let root_hex = hex::encode(merkle_root(&leaves));
@@ -150,7 +162,10 @@ async fn root(State(state): State<AppState>) -> Result<Json<RootResponse>, (Stat
         Ok(l) => l,
         Err(e) => {
             error!(?e, "failed to decode leaves");
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, "corrupt leaf storage".into()));
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "corrupt leaf storage".into(),
+            ));
         }
     };
     let root_hex = hex::encode(merkle_root(&leaves));
@@ -169,13 +184,19 @@ async fn prove(
         Ok(l) => l,
         Err(e) => {
             error!(?e, "failed to decode leaves");
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, "corrupt leaf storage".into()));
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "corrupt leaf storage".into(),
+            ));
         }
     };
 
     let proof = make_proof(&leaves, index).map_err(|err| match err {
         MerkleError::IndexOutOfRange => (StatusCode::NOT_FOUND, "leaf index out of range".into()),
-        _ => (StatusCode::INTERNAL_SERVER_ERROR, "unable to build proof".into()),
+        _ => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "unable to build proof".into(),
+        ),
     })?;
 
     Ok(Json(proof))
@@ -187,12 +208,17 @@ async fn verify(
     Ok(Json(reality_core::verify(&req)))
 }
 
-async fn anchors(State(state): State<AppState>) -> Result<Json<Vec<AnchorRecord>>, (StatusCode, String)> {
+async fn anchors(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<AnchorRecord>>, (StatusCode, String)> {
     match state.read_anchors().await {
         Ok(records) => Ok(Json(records)),
         Err(err) => {
             error!(?err, "failed to read anchors");
-            Err((StatusCode::INTERNAL_SERVER_ERROR, "failed to read anchors".into()))
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "failed to read anchors".into(),
+            ))
         }
     }
 }
