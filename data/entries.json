@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "payload": "hello world",
+    "leaf": "4eccf34608d31bac5c7becf6006df59005d828181056d092084e341e6bb005bd",
+    "appended_at": "2025-09-18T22:03:15.303621Z"
+  }
+]
