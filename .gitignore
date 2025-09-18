@@ -1,0 +1,7 @@
+target/
+**/*.rs.bk
+Cargo.lock
+web/wasm-core/pkg/
+web/verifier-ext/node_modules/
+wasm-pack.log
+.DS_Store

@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1f2933, #0b101a);
+  color: #f3f4f6;
+}
+
+main.container {
+  width: min(720px, 90vw);
+  background: rgba(15, 17, 26, 0.85);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 2rem;
+  letter-spacing: 0.03em;
+}
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  color: inherit;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.95rem;
+}
+
+textarea:focus {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  color: #0b1120;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button[data-action="sample"] {
+  background: rgba(148, 163, 184, 0.25);
+  color: #f8fafc;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(56, 189, 248, 0.35);
+}
+
+pre.output {
+  min-height: 3rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+}
+
+pre.output[data-state="ok"] {
+  border-color: rgba(74, 222, 128, 0.6);
+}
+
+pre.output[data-state="err"] {
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+pre.output[data-state="warn"] {
+  border-color: rgba(250, 204, 21, 0.6);
+}
+
+pre.output[data-state="info"] {
+  border-color: rgba(129, 140, 248, 0.6);
+}
